@@ -1063,15 +1063,19 @@
         game.usedPowers.add(powerId);
         updateBullets();
       } else if (powerId === 'future') {
-        const n = Math.floor(Math.random() * 3) + 2;
-        const future = game.chamber.slice(0, n);
-        const display = future.map(b => b ? '💥' : '⚪').join(' → ');
-        showNotif(`🔮 FUTURE: Next ${n}: ${display}`);
+        const n = Math.floor(Math.random() * Math.min(game.chamber.length, 4)) + 1; // 1 to min(4, chamber length)
+        if (n > game.chamber.length) {
+          showNotif('⚠️ NOT ENOUGH BULLETS!');
+          return;
+        }
+        const nthBullet = game.chamber[n - 1];
+        const bulletType = nthBullet ? '💥 LIVE' : '⚪ BLANK';
+        showNotif(`🔮 FUTURE: Bullet #${n} is ${bulletType}`);
         game.usedPowers.add(powerId);
       } else if (powerId === 'skip') {
-        game.opponentSkipNext = true;
-        showNotif('⏭️ SKIP! Opponent skips next turn');
-        game.usedPowers.add(powerId);
+        // Skip activates AFTER your current turn
+        game.activePower = 'skip';
+        showNotif('⏭️ SKIP READY! Play your turn, then opponent skips');
       } else {
         game.activePower = game.activePower === powerId ? null : powerId;
         showNotif(game.activePower === powerId ? `⚡ ${power.name} READY!` : 'Power deactivated');
@@ -1150,6 +1154,15 @@
         if (game.activePower === 'double') {
           game.usedPowers.add('double');
         }
+        
+        // Handle skip AFTER the shot
+        const skipWasActive = game.activePower === 'skip';
+        if (skipWasActive) {
+          game.opponentSkipNext = true;
+          game.usedPowers.add('skip');
+          showNotif('⏭️ SKIP ACTIVATED! Opponent will skip next turn');
+        }
+        
         game.activePower = null;
         
         updateUI();
