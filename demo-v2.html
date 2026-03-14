@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Game - Buckshot Roulette</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .balance-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .hero {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInUp 0.8s ease;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .btn {
+      padding: 18px 40px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 900px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+    
+    .close-btn {
+      float: right;
+      font-size: 2.5rem;
+      cursor: pointer;
+      color: #667eea;
+      transition: all 0.3s ease;
+    }
+    
+    .close-btn:hover {
+      color: #ff4757;
+      transform: rotate(90deg);
+    }
+    
+    .coin-flip {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .coin {
+      font-size: 8rem;
+      animation: coinFlip 1s ease;
+      display: inline-block;
+    }
+    
+    @keyframes coinFlip {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(1800deg); }
+    }
+    
+    .game-arena {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 20px 0;
+      border: 2px solid #667eea;
+    }
+    
+    .round-info {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: rgba(102, 126, 234, 0.2);
+      border-radius: 12px;
+      border: 1px solid rgba(102, 126, 234, 0.5);
+    }
+    
+    .bullets-display {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+      font-size: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .bullet {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 2s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .bullet.live {
+      background: linear-gradient(135deg, #ff4757 0%, #c23616 100%);
+      box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
+    }
+    
+    .bullet.blank {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    
+    .character-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      border-radius: 16px;
+      padding: 25px;
+      margin: 15px 0;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .character-card.active {
+      border-color: #2ecc71;
+      box-shadow: 0 0 30px rgba(46, 204, 113, 0.6);
+      transform: scale(1.02);
+    }
+    
+    .character-avatar {
+      font-size: 4rem;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.8));
+    }
+    
+    .health-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+      font-size: 2rem;
+    }
+    
+    .heart {
+      animation: heartbeat 1.5s infinite;
+    }
+    
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .power-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    
+    .power-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .power-card:hover:not(.used) {
+      border-color: #ffa502;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(255, 165, 2, 0.4);
+    }
+    
+    .power-card.used {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .power-card.active {
+      border-color: #2ecc71;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+    }
+    
+    .power-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .power-name {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+    
+    .btn-shoot {
+      background: linear-gradient(135deg, #ff4757 0%, #c23616 100%);
+      color: white;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+      z-index: 2000;
+      display: none;
+      max-width: 90%;
+      text-align: center;
+    }
+    
+    .notification.show {
+      display: block;
+      animation: notifSlide 0.5s ease;
+    }
+    
+    @keyframes notifSlide {
+      from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    .character-select {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    
+    .character-option {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .character-option:hover {
+      border-color: #667eea;
+      transform: scale(1.05);
+    }
+    
+    .powers-label {
+      background: rgba(0,0,0,0.3);
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body>
+  <audio id="shootSound" preload="auto"></audio>
+  <audio id="bangSound" preload="auto"></audio>
+  
+  <div id="notification" class="notification"></div>
+
+  <div class="navbar">
+    <h1>🎮 Crypto Game</h1>
+    <div class="balance-badge">🪙 <span id="balance">10.00</span></div>
+  </div>
+
+  <div class="container">
+    <div class="hero">
+      <h1>🔫 Buckshot Roulette: Crypto Edition</h1>
+      <p style="font-size: 1.2rem; color: rgba(255,255,255,0.7);">
+        Random Powers Each Round • Coin Flip Start • Strategic Combat
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+      <button class="btn btn-primary" onclick="showCharacterSelect()">🎯 Start Game</button>
+    </div>
+  </div>
+
+  <div id="coinFlipModal" class="modal">
+    <div class="modal-content">
+      <h2 style="text-align: center; margin-bottom: 30px;">🪙 Coin Flip!</h2>
+      <div class="coin-flip">
+        <div class="coin" id="coin">🪙</div>
+      </div>
+      <h3 style="text-align: center; margin-top: 30px;" id="coinResult"></h3>
+    </div>
+  </div>
+
+  <div id="characterModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('characterModal')">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 30px;">Choose Your Character</h2>
+      
+      <div class="character-select">
+        <div class="character-option" onclick="selectCharacter('🥷', 'Shadow')">
+          <div class="character-avatar">🥷</div>
+          <h3>Shadow</h3>
+        </div>
+        <div class="character-option" onclick="selectCharacter('🤠', 'Gunslinger')">
+          <div class="character-avatar">🤠</div>
+          <h3>Gunslinger</h3>
+        </div>
+        <div class="character-option" onclick="selectCharacter('⚔️', 'Knight')">
+          <div class="character-avatar">⚔️</div>
+          <h3>Knight</h3>
+        </div>
+        <div class="character-option" onclick="selectCharacter('🧙', 'Wizard')">
+          <div class="character-avatar">🧙</div>
+          <h3>Wizard</h3>
+        </div>
+      </div>
+      <p style="text-align: center; color: rgba(255,255,255,0.6); margin-top: 20px;">
+        💡 Powers reset & randomize each round!
+      </p>
+    </div>
+  </div>
+
+  <div id="gameModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="endGame()">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 20px;">⚔️ Battle Arena</h2>
+      
+      <div class="round-info">
+        <h3 style="color: #667eea; margin-bottom: 10px;">Round <span id="round">1</span></h3>
+        <p style="color: rgba(255,255,255,0.7);">Powers have been reshuffled!</p>
+      </div>
+      
+      <div class="game-arena">
+        <div class="bullets-display" id="bullets"></div>
+        <p style="text-align: center; font-size: 1.2rem; color: rgba(255,255,255,0.7);">
+          💥 Live: <span id="liveCount">0</span> | ⚪ Blank: <span id="blankCount">0</span>
+        </p>
+      </div>
+
+      <div class="character-card" id="opponentCard">
+        <div style="text-align: center;">
+          <div class="character-avatar" id="opponentAvatar"></div>
+          <h3 id="opponentName"></h3>
+          <div class="health-bar" id="opponentHealth"></div>
+          <div class="powers-label">
+            <strong>Powers:</strong> <span id="opponentPowers"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <h2 id="turnText" style="color: #2ecc71;"></h2>
+      </div>
+
+      <div class="character-card active" id="playerCard">
+        <div style="text-align: center;">
+          <div class="character-avatar" id="playerAvatar"></div>
+          <h3 id="playerName"></h3>
+          <div class="health-bar" id="playerHealth"></div>
+        </div>
+      </div>
+
+      <div id="powersSection">
+        <h4 style="text-align: center; margin-bottom: 15px;">⚡ Your Powers</h4>
+        <div class="power-cards" id="playerPowers"></div>
+      </div>
+
+      <div class="action-buttons" id="actions">
+        <button class="btn btn-shoot" onclick="shoot('opponent')">🔫 Shoot Opponent</button>
+        <button class="btn btn-primary" onclick="shoot('self')">🎲 Shoot Self</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate realistic gunshot sounds
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(freq, duration) {
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.frequency.value = freq;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + duration);
+    }
+    
+    function soundClick() { playSound(400, 0.05); }
+    function soundBang() {
+      // Gunshot sound - loud bang
+      playSound(80, 0.15);
+      setTimeout(() => playSound(150, 0.1), 50);
+    }
+    function soundBlank() { playSound(300, 0.1); }
+    function soundWin() { playSound(600, 0.5); }
+    function soundLose() { playSound(150, 0.8); }
+    function soundHeal() { playSound(500, 0.4); }
+    function soundPower() { playSound(800, 0.3); }
+
+    const ALL_POWERS = [
+      { id: 'skip', icon: '⏭️', name: 'Skip Turn', desc: 'Opponent skips next turn' },
+      { id: 'xray', icon: '👁️', name: 'X-Ray', desc: 'See next bullet' },
+      { id: 'double', icon: '⚡', name: 'Double DMG', desc: 'Next live = 2 damage' },
+      { id: 'heal', icon: '💊', name: 'Heal', desc: '+1 HP (max 3)' },
+      { id: 'swap', icon: '🔄', name: 'Swap', desc: 'Change next bullet type' },
+      { id: 'future', icon: '🔮', name: 'Future', desc: 'See next N bullets' }
+    ];
+
+    let game = {
+      chamber: [],
+      playerHP: 3,
+      opponentHP: 3,
+      playerAvatar: '',
+      playerName: '',
+      opponentAvatar: '',
+      opponentName: '',
+      currentTurn: 'player',
+      opponentSkipNext: false,
+      playerSkipNext: false,
+      round: 1,
+      playerPowers: [],
+      opponentPowers: [],
+      usedPowers: new Set(),
+      activePower: null,
+      balance: 10
+    };
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function getRandomPowers(count) {
+      const shuffled = [...ALL_POWERS];
+      shuffle(shuffled);
+      return shuffled.slice(0, count);
+    }
+
+    function showNotif(msg) {
+      const n = document.getElementById('notification');
+      n.textContent = msg;
+      n.classList.add('show');
+      setTimeout(() => n.classList.remove('show'), 3000);
+    }
+
+    function showCharacterSelect() {
+      document.getElementById('characterModal').classList.add('active');
+    }
+
+    function selectCharacter(avatar, name) {
+      game.playerAvatar = avatar;
+      game.playerName = name;
+      
+      const chars = [['🥷', 'Shadow'], ['🤠', 'Gunslinger'], ['⚔️', 'Knight'], ['🧙', 'Wizard']];
+      const opp = chars[Math.floor(Math.random() * chars.length)];
+      game.opponentAvatar = opp[0];
+      game.opponentName = opp[1];
+      
+      closeModal('characterModal');
+      coinFlip();
+    }
+
+    function coinFlip() {
+      document.getElementById('coinFlipModal').classList.add('active');
+      const coin = document.getElementById('coin');
+      coin.style.animation = 'none';
+      setTimeout(() => {
+        coin.style.animation = 'coinFlip 1s ease';
+      }, 10);
+      
+      const isHeads = Math.random() > 0.5;
+      
+      setTimeout(() => {
+        coin.textContent = isHeads ? '😊' : '💀';
+        game.currentTurn = isHeads ? 'player' : 'opponent';
+        document.getElementById('coinResult').textContent = 
+          isHeads ? '🎉 Heads! You go first!' : '💀 Tails! Opponent goes first!';
+        
+        setTimeout(() => {
+          closeModal('coinFlipModal');
+          startGame();
+        }, 2000);
+      }, 1000);
+    }
+
+    function startGame() {
+      game.playerHP = 3;
+      game.opponentHP = 3;
+      game.round = 1;
+      game.opponentSkipNext = false;
+      game.playerSkipNext = false;
+      
+      newRound();
+      updateUI();
+      document.getElementById('gameModal').classList.add('active');
+      
+      if (game.currentTurn === 'opponent') {
+        setTimeout(opponentTurn, 1500);
+      }
+    }
+
+    function newRound() {
+      // Randomize bullets each round
+      const live = Math.floor(Math.random() * 4) + 2; // 2-5
+      const blank = Math.floor(Math.random() * 4) + 2; // 2-5
+      game.chamber = [];
+      for (let i = 0; i < live; i++) game.chamber.push(true);
+      for (let i = 0; i < blank; i++) game.chamber.push(false);
+      shuffle(game.chamber);
+      
+      // Randomize powers each round
+      game.playerPowers = getRandomPowers(3);
+      game.opponentPowers = getRandomPowers(3);
+      
+      game.usedPowers = new Set();
+      game.activePower = null;
+      
+      updateBullets();
+      showNotif(`🔄 Round ${game.round} - New bullets & powers!`);
+    }
+
+    function updateUI() {
+      document.getElementById('playerAvatar').textContent = game.playerAvatar;
+      document.getElementById('playerName').textContent = game.playerName;
+      document.getElementById('opponentAvatar').textContent = game.opponentAvatar;
+      document.getElementById('opponentName').textContent = game.opponentName;
+      document.getElementById('round').textContent = game.round;
+      
+      const oppPowerNames = game.opponentPowers.map(p => p.icon).join(' ');
+      document.getElementById('opponentPowers').textContent = oppPowerNames;
+      
+      updateHealth();
+      updateTurn();
+      updatePowers();
+      updateBullets();
+    }
+
+    function updateHealth() {
+      document.getElementById('playerHealth').innerHTML = '❤️'.repeat(Math.max(0, game.playerHP));
+      document.getElementById('opponentHealth').innerHTML = '❤️'.repeat(Math.max(0, game.opponentHP));
+    }
+
+    function updateTurn() {
+      const isPlayer = game.currentTurn === 'player';
+      let turnMsg = isPlayer ? '🎯 YOUR TURN!' : '⏳ Opponent\'s Turn...';
+      
+      if (game.playerSkipNext && isPlayer) {
+        turnMsg = '⏭️ SKIPPED! Opponent goes again';
+      } else if (game.opponentSkipNext && !isPlayer) {
+        turnMsg = '⏭️ Opponent SKIPPED! Your turn again!';
+      }
+      
+      document.getElementById('turnText').textContent = turnMsg;
+      document.getElementById('turnText').style.color = isPlayer ? '#2ecc71' : '#ffa502';
+      document.getElementById('playerCard').classList.toggle('active', isPlayer);
+      document.getElementById('opponentCard').classList.toggle('active', !isPlayer);
+      
+      document.getElementById('actions').style.display = isPlayer ? 'flex' : 'none';
+      document.getElementById('powersSection').style.display = isPlayer ? 'block' : 'none';
+    }
+
+    function updateBullets() {
+      const live = game.chamber.filter(b => b).length;
+      const blank = game.chamber.length - live;
+      document.getElementById('liveCount').textContent = live;
+      document.getElementById('blankCount').textContent = blank;
+      
+      const html = game.chamber.map(b => 
+        `<div class="bullet ${b ? 'live' : 'blank'}">${b ? '💥' : '⚪'}</div>`
+      ).join('');
+      document.getElementById('bullets').innerHTML = html;
+    }
+
+    function updatePowers() {
+      const html = game.playerPowers.map(p => {
+        const used = game.usedPowers.has(p.id);
+        const active = game.activePower === p.id;
+        return `
+          <div class="power-card ${used ? 'used' : ''} ${active ? 'active' : ''}" onclick="usePower('${p.id}')">
+            <div class="power-icon">${p.icon}</div>
+            <div class="power-name">${p.name}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('playerPowers').innerHTML = html;
+    }
+
+    function usePower(powerId) {
+      if (game.currentTurn !== 'player') return;
+      if (game.usedPowers.has(powerId)) {
+        showNotif('⚠️ Power already used!');
+        return;
+      }
+      
+      const power = game.playerPowers.find(p => p.id === powerId);
+      if (!power) return;
+      
+      soundPower();
+      
+      if (powerId === 'xray') {
+        const next = game.chamber[0];
+        showNotif(`👁️ X-Ray: Next is ${next ? '💥 LIVE!' : '⚪ BLANK!'}`);
+        game.usedPowers.add(powerId);
+      } else if (powerId === 'heal') {
+        if (game.playerHP >= 3) {
+          showNotif('⚠️ Already at max HP!');
+          return;
+        }
+        soundHeal();
+        game.playerHP++;
+        showNotif('💊 Healed! +1 HP');
+        game.usedPowers.add(powerId);
+        updateHealth();
+      } else if (powerId === 'swap') {
+        if (game.chamber.length === 0) {
+          showNotif('⚠️ No bullets left!');
+          return;
+        }
+        game.chamber[0] = !game.chamber[0];
+        showNotif(`🔄 Swapped! Next is ${game.chamber[0] ? '💥 LIVE' : '⚪ BLANK'}`);
+        game.usedPowers.add(powerId);
+        updateBullets();
+      } else if (powerId === 'future') {
+        const n = Math.floor(Math.random() * 3) + 2;
+        const future = game.chamber.slice(0, n);
+        const display = future.map(b => b ? '💥' : '⚪').join(' → ');
+        showNotif(`🔮 Future: Next ${n}: ${display}`);
+        game.usedPowers.add(powerId);
+      } else if (powerId === 'skip') {
+        game.opponentSkipNext = true;
+        showNotif('⏭️ Skip activated! Opponent will skip next turn');
+        game.usedPowers.add(powerId);
+      } else {
+        game.activePower = game.activePower === powerId ? null : powerId;
+        showNotif(game.activePower === powerId ? `⚡ ${power.name} ready!` : 'Power deactivated');
+      }
+      
+      updatePowers();
+    }
+
+    function shoot(target) {
+      if (game.currentTurn !== 'player') return;
+      
+      // Check if player should skip
+      if (game.playerSkipNext) {
+        game.playerSkipNext = false;
+        game.currentTurn = 'opponent';
+        updateUI();
+        showNotif('⏭️ You were skipped!');
+        setTimeout(opponentTurn, 1500);
+        return;
+      }
+      
+      if (game.chamber.length === 0) {
+        game.round++;
+        newRound();
+        updateUI();
+        return;
+      }
+      
+      soundClick();
+      const isLive = game.chamber.shift();
+      
+      setTimeout(() => {
+        if (isLive) {
+          soundBang();
+          const dmg = game.activePower === 'double' ? 2 : 1;
+          
+          if (target === 'opponent') {
+            game.opponentHP -= dmg;
+            showNotif(`💥 BANG! Opponent -${dmg} HP`);
+            
+            if (game.opponentHP <= 0) {
+              soundWin();
+              game.balance += 1.8;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('🎉 VICTORY! +1.8 coins!');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          } else {
+            game.playerHP -= dmg;
+            showNotif(`💥 BANG! You -${dmg} HP`);
+            
+            if (game.playerHP <= 0) {
+              soundLose();
+              game.balance -= 1;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('💀 DEFEAT! -1 coin');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          }
+          
+          game.currentTurn = 'opponent';
+        } else {
+          soundBlank();
+          showNotif('⚪ Click! Blank. ' + (target === 'self' ? 'Go again!' : 'Opponent turn'));
+          
+          if (target === 'opponent') {
+            game.currentTurn = 'opponent';
+          }
+        }
+        
+        if (game.activePower === 'double') {
+          game.usedPowers.add('double');
+        }
+        game.activePower = null;
+        
+        updateUI();
+        
+        if (game.chamber.length === 0) {
+          setTimeout(() => {
+            game.round++;
+            newRound();
+            updateUI();
+            if (game.currentTurn === 'opponent') {
+              setTimeout(opponentTurn, 1500);
+            }
+          }, 1500);
+        } else if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        }
+      }, 500);
+    }
+
+    function opponentTurn() {
+      if (game.currentTurn !== 'opponent') return;
+      
+      // Check skip
+      if (game.opponentSkipNext) {
+        game.opponentSkipNext = false;
+        game.currentTurn = 'player';
+        updateUI();
+        showNotif('⏭️ Opponent skipped! Your turn');
+        return;
+      }
+      
+      if (game.chamber.length === 0) {
+        game.round++;
+        newRound();
+        updateUI();
+        if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        }
+        return;
+      }
+      
+      // AI uses powers
+      if (Math.random() > 0.6) {
+        const available = game.opponentPowers.filter(p => !game.usedPowers.has('opp_' + p.id));
+        if (available.length > 0) {
+          const power = available[Math.floor(Math.random() * available.length)];
+          
+          if (power.id === 'heal' && game.opponentHP < 3) {
+            soundHeal();
+            game.opponentHP++;
+            showNotif('Opponent used 💊 Heal!');
+            game.usedPowers.add('opp_heal');
+            updateHealth();
+            setTimeout(opponentTurn, 1000);
+            return;
+          } else if (power.id === 'swap') {
+            game.chamber[0] = !game.chamber[0];
+            showNotif('Opponent used 🔄 Swap!');
+            game.usedPowers.add('opp_swap');
+            updateBullets();
+          } else if (power.id === 'skip') {
+            game.playerSkipNext = true;
+            showNotif('Opponent used ⏭️ Skip! You\'ll miss next turn');
+            game.usedPowers.add('opp_skip');
+          }
+        }
+      }
+      
+      const target = Math.random() > 0.7 ? 'self' : 'opponent';
+      
+      soundClick();
+      const isLive = game.chamber.shift();
+      
+      setTimeout(() => {
+        if (isLive) {
+          soundBang();
+          
+          if (target === 'opponent') {
+            game.playerHP--;
+            showNotif('💥 BANG! Opponent hits you!');
+            
+            if (game.playerHP <= 0) {
+              soundLose();
+              game.balance -= 1;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('💀 DEFEAT! -1 coin');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          } else {
+            game.opponentHP--;
+            showNotif('💥 BANG! Opponent shoots self!');
+            
+            if (game.opponentHP <= 0) {
+              soundWin();
+              game.balance += 1.8;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('🎉 VICTORY! +1.8 coins!');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          }
+          
+          game.currentTurn = 'player';
+        } else {
+          soundBlank();
+          showNotif('⚪ Click! Opponent got blank. ' + (target === 'self' ? 'They go again' : 'Your turn'));
+          
+          if (target === 'opponent') {
+            game.currentTurn = 'player';
+          }
+        }
+        
+        updateUI();
+        
+        if (game.chamber.length === 0) {
+          setTimeout(() => {
+            game.round++;
+            newRound();
+            updateUI();
+            if (game.currentTurn === 'opponent') {
+              setTimeout(opponentTurn, 1500);
+            }
+          }, 1500);
+        } else if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        }
+      }, 500);
+    }
+
+    function endGame() {
+      closeModal('gameModal');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+  </script>
+</body>
+</html>
