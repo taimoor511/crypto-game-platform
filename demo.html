@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Game Platform - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+      color: #ffffff;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .balance-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .balance-amount {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .btn {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 10px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    
+    .info-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .info-section h3 {
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+    
+    .info-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .info-section li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .game-screen {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      margin: 40px 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .player-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 2px solid #667eea;
+    }
+    
+    .health {
+      font-size: 2rem;
+      margin: 10px 0;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: #1a1a2e;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .close-btn {
+      float: right;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>🎮 Crypto Game Platform</h1>
+    <div>🪙 10.00 Coins</div>
+  </div>
+
+  <div class="container">
+    <div class="balance-card">
+      <h2>Welcome, Demo Player!</h2>
+      <div class="balance-amount">
+        <span>🪙</span>
+        <span>10.00</span>
+        <span style="font-size: 1.5rem; opacity: 0.8;">Coins</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Games Played</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Wins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0%</div>
+        <div class="stat-label">Win Rate</div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+      <button class="btn btn-primary" onclick="showGame()">🎯 Play Now</button>
+      <button class="btn btn-primary" onclick="showWallet()">💰 Wallet</button>
+    </div>
+
+    <div class="info-section">
+      <h3>How to Play</h3>
+      <ul>
+        <li>🎲 <strong>Entry Cost:</strong> 1 coin per match</li>
+        <li>🏆 <strong>Winner Reward:</strong> 1.8 coins</li>
+        <li>🔫 <strong>Gameplay:</strong> Turn-based Buckshot Roulette - survive to win!</li>
+        <li>💵 <strong>Deposit:</strong> Send USDT (BSC Testnet) to get coins</li>
+        <li>💸 <strong>Withdraw:</strong> Cash out your coins back to USDT anytime</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Game Modal -->
+  <div id="gameModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('gameModal')">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 20px;">🎮 Buckshot Roulette</h2>
+      
+      <div class="game-screen">
+        <h3>🔫 Bullets Remaining: 6</h3>
+        <p>💥 Live: 3 | ⚪ Blank: 3</p>
+      </div>
+
+      <div class="player-card">
+        <h3>Opponent</h3>
+        <div class="health">❤️ ❤️ ❤️</div>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <h3 style="color: #667eea;">🎯 Your Turn!</h3>
+      </div>
+
+      <div class="player-card">
+        <h3>You</h3>
+        <div class="health">❤️ ❤️ ❤️</div>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <button class="btn btn-primary" onclick="alert('💥 LIVE! You hit opponent!')">🔫 Shoot Opponent</button>
+        <button class="btn btn-primary" onclick="alert('⚪ Blank! You go again!')">🎲 Shoot Self</button>
+      </div>
+
+      <p style="text-align: center; color: rgba(255,255,255,0.5); margin-top: 20px;">
+        💡 Shoot yourself with a blank to go again!
+      </p>
+    </div>
+  </div>
+
+  <!-- Wallet Modal -->
+  <div id="walletModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('walletModal')">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 30px;">💰 Wallet</h2>
+      
+      <div class="info-section" style="margin-bottom: 20px;">
+        <h3>📥 Deposit USDT</h3>
+        <p style="margin: 15px 0; color: rgba(255,255,255,0.7);">
+          Deposit Address (BSC Testnet):
+        </p>
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; word-break: break-all; font-family: monospace;">
+          0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+        </div>
+        <p style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+          Send test USDT to this address. 1 USDT = 1 coin.
+        </p>
+      </div>
+
+      <div class="info-section">
+        <h3>📤 Withdraw</h3>
+        <p style="margin: 15px 0; color: rgba(255,255,255,0.7);">
+          Convert your coins back to USDT
+        </p>
+        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+          • Max: 10 USDT per withdrawal<br>
+          • Max: 50 USDT per day<br>
+          • 24h cooldown for new accounts
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showGame() {
+      document.getElementById('gameModal').classList.add('active');
+    }
+
+    function showWallet() {
+      document.getElementById('walletModal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>
