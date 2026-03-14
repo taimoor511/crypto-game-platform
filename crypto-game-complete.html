@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Roulette - P2E Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Page Styles */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Login/Signup Page */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            padding: 20px 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+
+        .balance {
+            font-size: 1.5em;
+        }
+
+        .balance span {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-deposit {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-withdraw {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .btn-play {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4);
+        }
+
+        /* Matching Screen */
+        .matching-screen {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top: 8px solid #4ecdc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Game Screen */
+        .game-screen {
+            padding: 20px 0;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .health-bar {
+            width: 200px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff8787);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .powers-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .powers-panel h3 {
+            margin-bottom: 15px;
+            text-align: center;
+            color: #4ecdc4;
+        }
+
+        .power-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(78, 205, 196, 0.2);
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .power-btn:hover:not(:disabled) {
+            background: rgba(78, 205, 196, 0.4);
+            transform: translateX(5px);
+        }
+
+        .power-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .power-btn .power-name {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .power-btn .power-desc {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* OPPONENT POWERS - LARGER */
+        .opponent-powers .power-btn {
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .opponent-powers .power-btn .power-name {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .opponent-powers .power-btn .power-desc {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        .game-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+        }
+
+        .gun {
+            font-size: 120px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .gun:hover {
+            transform: scale(1.1) rotate(-10deg);
+        }
+
+        .bullets-display {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .bullet {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(180deg, #ffd700, #ffed4e);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .bullet::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 10px;
+            background: #8B7500;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-shoot, .btn-dodge {
+            padding: 20px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-shoot {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-dodge {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .btn-shoot:hover, .btn-dodge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .turn-indicator {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+            text-align: center;
+        }
+
+        /* Info Page */
+        .info-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .info-page h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-section h2 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .info-section h3 {
+            color: #ff6b6b;
+            margin: 20px 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .info-section p, .info-section li {
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .info-section ul {
+            margin-left: 20px;
+        }
+
+        .power-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .power-card {
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px solid #4ecdc4;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .power-card h4 {
+            color: #4ecdc4;
+            margin-bottom: 8px;
+        }
+
+        /* Wallet Pages */
+        .wallet-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .wallet-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .wallet-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4ecdc4;
+            font-size: 2em;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .wallet-info {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .wallet-info p {
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+
+        .wallet-info strong {
+            color: #4ecdc4;
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+            margin-top: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            .powers-panel {
+                order: 3;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-shoot, .btn-dodge {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .flash {
+            animation: flash 0.3s 3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>🎰 Crypto Roulette</h1>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="loginUsername" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-secondary" onclick="showPage('signupPage')">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signupPage" class="page">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>🎰 Create Account</h1>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="signupUsername" placeholder="Choose username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signupPassword" placeholder="Choose password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                    <button type="button" class="btn btn-secondary" onclick="showPage('loginPage')">Back to Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardPage" class="page">
+        <div class="container dashboard">
+            <div class="header">
+                <div class="balance">
+                    Balance: <span id="playerBalance">100</span> Coins
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-small btn-info" onclick="showPage('infoPage')">How to Play</button>
+                    <button class="btn-small btn-deposit" onclick="showPage('depositPage')">Deposit</button>
+                    <button class="btn-small btn-withdraw" onclick="showPage('withdrawPage')">Withdraw</button>
+                    <button class="btn-small btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Wins</h3>
+                    <div class="value" id="totalWins">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Losses</h3>
+                    <div class="value" id="totalLosses">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Win Rate</h3>
+                    <div class="value" id="winRate">0%</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Earnings</h3>
+                    <div class="value" id="totalEarnings">0</div>
+                </div>
+            </div>
+
+            <button class="btn-play" onclick="findMatch()">🎮 Find Match (1 Coin)</button>
+        </div>
+    </div>
+
+    <!-- Matching Screen -->
+    <div id="matchingPage" class="page">
+        <div class="container matching-screen">
+            <h1>Finding Opponent...</h1>
+            <div class="spinner"></div>
+            <p>Please wait while we match you with a player</p>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gamePage" class="page">
+        <div class="container game-screen">
+            <div class="game-header">
+                <div class="player-info">
+                    <div class="avatar">👤</div>
+                    <div>
+                        <div><strong id="playerName">You</strong></div>
+                        <div class="health-bar">
+                            <div class="health-fill" id="playerHealth" style="width: 100%;">100 HP</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-info">
+                    <div>
+                        <div><strong id="opponentName">AI Opponent</strong></div>
+                        <div class="health-bar">
+                            <div class="health-fill" id="opponentHealth" style="width: 100%;">100 HP</div>
+                        </div>
+                    </div>
+                    <div class="avatar">🤖</div>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <!-- Player Powers -->
+                <div class="powers-panel">
+                    <h3>Your Powers</h3>
+                    <div id="playerPowers"></div>
+                </div>
+
+                <!-- Game Center -->
+                <div class="game-center">
+                    <div class="turn-indicator" id="turnIndicator">Your Turn</div>
+                    <div class="gun" onclick="shootGun()">🔫</div>
+                    <div class="bullets-display" id="bulletsDisplay"></div>
+                    <div class="action-buttons">
+                        <button class="btn-shoot" onclick="shootOpponent()">Shoot Opponent</button>
+                        <button class="btn-dodge" onclick="shootSelf()">Shoot Self (Dodge)</button>
+                    </div>
+                </div>
+
+                <!-- Opponent Powers -->
+                <div class="powers-panel opponent-powers">
+                    <h3>Opponent Powers</h3>
+                    <div id="opponentPowers"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="forfeit()">Forfeit Match</button>
+        </div>
+    </div>
+
+    <!-- Info Page -->
+    <div id="infoPage" class="page">
+        <div class="info-page">
+            <h1>📖 How to Play</h1>
+
+            <div class="info-section">
+                <h2>Game Rules</h2>
+                <p><strong>Crypto Roulette</strong> is a 1v1 multiplayer game inspired by Buckshot Roulette. Two players compete using a revolver loaded with live and blank bullets.</p>
+                
+                <h3>Objective</h3>
+                <ul>
+                    <li>Reduce opponent's health to 0 to win</li>
+                    <li>Entry cost: 1 coin per match</li>
+                    <li>Winner receives: 1.8 coins (0.2 platform fee)</li>
+                </ul>
+
+                <h3>Gameplay</h3>
+                <ul>
+                    <li>Each round starts with 2-5 live bullets and 2-5 blank bullets (randomized)</li>
+                    <li>Maximum 5 bullets per round</li>
+                    <li>Coin flip determines who goes first</li>
+                    <li>On your turn, choose to shoot opponent or shoot yourself (dodge)</li>
+                    <li>Live bullet = 20 damage, Blank bullet = 0 damage</li>
+                    <li>If you shoot yourself with a blank, you get another turn</li>
+                    <li>After 5 turns or all bullets used, a new round starts with fresh bullets</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <h2>Powers & Skills</h2>
+                <p>Each player receives 3 random unique powers at the start of each round. Powers reset between rounds.</p>
+
+                <div class="power-grid">
+                    <div class="power-card">
+                        <h4>🚫 Skip Turn</h4>
+                        <p>Opponent misses their entire next turn. You get consecutive turns.</p>
+                    </div>
+                    <div class="power-card">
+                        <h4>👁️ X-Ray</h4>
+                        <p>Reveals the current bullet type (live or blank) before you shoot.</p>
+                    </div>
+                    <div class="power-card">
+                        <h4>💥 Double Damage</h4>
+                        <p>Your next shot deals 40 damage instead of 20.</p>
+                    </div>
+                    <div class="power-card">
+                        <h4>💚 Heal</h4>
+                        <p>Restore 25 HP instantly. Cannot exceed 100 HP.</p>
+                    </div>
+                    <div class="power-card">
+                        <h4>🔄 Swap</h4>
+                        <p>Swaps current bullet with next bullet in chamber.</p>
+                    </div>
+                    <div class="power-card">
+                        <h4>🔮 Future Sight</h4>
+                        <p>Shows the next 3 bullets in order.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Strategy Tips</h2>
+                <ul>
+                    <li>Use X-Ray before important shots to avoid wasting turns</li>
+                    <li>Save Heal for critical moments (below 40 HP)</li>
+                    <li>Double Damage is most effective when opponent is low on health</li>
+                    <li>Skip Turn can secure consecutive attacks for finishing blow</li>
+                    <li>Future Sight helps plan 2-3 turns ahead</li>
+                    <li>Shooting yourself with blank = free turn, but risky!</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-primary" onclick="showPage('dashboardPage')">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Deposit Page -->
+    <div id="depositPage" class="page">
+        <div class="wallet-container">
+            <div class="wallet-box">
+                <h2>💰 Deposit USDT</h2>
+                
+                <div class="wallet-info">
+                    <p><strong>Deposit Address (BSC Testnet):</strong></p>
+                    <p style="word-break: break-all;">0xe2A7c7a80B7bce7181C5Deb6FBc48C23e35EFfe0</p>
+                    <p style="margin-top: 15px;"><strong>Exchange Rate:</strong> 1 USDT = 10 Coins</p>
+                    <p><strong>Minimum Deposit:</strong> 1 USDT</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Amount (USDT)</label>
+                    <input type="number" id="depositAmount" placeholder="Enter amount" min="1" step="0.1">
+                </div>
+
+                <div class="input-group">
+                    <label>Transaction Hash (after sending)</label>
+                    <input type="text" id="depositTxHash" placeholder="Paste transaction hash">
+                </div>
+
+                <button class="btn btn-primary" onclick="processDeposit()">Confirm Deposit</button>
+                <button class="btn btn-back" onclick="showPage('dashboardPage')">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Page -->
+    <div id="withdrawPage" class="page">
+        <div class="wallet-container">
+            <div class="wallet-box">
+                <h2>💸 Withdraw USDT</h2>
+                
+                <div class="wallet-info">
+                    <p><strong>Available Balance:</strong> <span id="withdrawBalance">100</span> Coins</p>
+                    <p><strong>Exchange Rate:</strong> 10 Coins = 1 USDT</p>
+                    <p><strong>Withdrawal Limits:</strong></p>
+                    <ul style="margin-left: 20px; color: #ddd;">
+                        <li>Maximum: 10 USDT per withdrawal</li>
+                        <li>Daily Limit: 50 USDT</li>
+                        <li>New accounts: 24h cooldown</li>
+                    </ul>
+                </div>
+
+                <div class="input-group">
+                    <label>Withdrawal Amount (Coins)</label>
+                    <input type="number" id="withdrawAmount" placeholder="Enter coins" min="10" step="10">
+                </div>
+
+                <div class="input-group">
+                    <label>Your BSC Wallet Address</label>
+                    <input type="text" id="withdrawAddress" placeholder="0x...">
+                </div>
+
+                <button class="btn btn-primary" onclick="processWithdraw()">Request Withdrawal</button>
+                <button class="btn btn-back" onclick="showPage('dashboardPage')">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio Context for Sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTriggerClick() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        function playGunshot() {
+            // Create realistic gunshot sound using white noise and filters
+            const bufferSize = audioContext.sampleRate * 0.5; // 0.5 second
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate white noise
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            const noise = audioContext.createBufferSource();
+            noise.buffer = buffer;
+            
+            // Create filter for gunshot character
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1000;
+            filter.Q.value = 0.5;
+            
+            // Create gain envelope for realistic gunshot
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            // Connect nodes
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Play
+            noise.start(audioContext.currentTime);
+            noise.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Game State
+        let gameState = {
+            player: {
+                username: '',
+                balance: 100,
+                health: 100,
+                powers: [],
+                wins: 0,
+                losses: 0,
+                earnings: 0
+            },
+            opponent: {
+                health: 100,
+                powers: []
+            },
+            bullets: [],
+            currentBulletIndex: 0,
+            isPlayerTurn: true,
+            roundNumber: 1,
+            turnCount: 0,
+            doubleDamageActive: false,
+            skipNextTurn: false,
+            inGame: false
+        };
+
+        const powersList = [
+            { id: 'skip', name: '🚫 Skip Turn', desc: 'Opponent misses next turn' },
+            { id: 'xray', name: '👁️ X-Ray', desc: 'Reveal current bullet' },
+            { id: 'double', name: '💥 Double Damage', desc: 'Next shot deals 40 damage' },
+            { id: 'heal', name: '💚 Heal', desc: 'Restore 25 HP' },
+            { id: 'swap', name: '🔄 Swap', desc: 'Swap current with next bullet' },
+            { id: 'future', name: '🔮 Future Sight', desc: 'See next 3 bullets' }
+        ];
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Auth Functions
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            gameState.player.username = username;
+            alert('Welcome back, ' + username + '!');
+            showPage('dashboardPage');
+            updateDashboard();
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            gameState.player.username = username;
+            alert('Account created! Welcome, ' + username + '!');
+            showPage('dashboardPage');
+            updateDashboard();
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showPage('loginPage');
+                gameState.player.username = '';
+            }
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            document.getElementById('playerBalance').textContent = gameState.player.balance;
+            document.getElementById('totalWins').textContent = gameState.player.wins;
+            document.getElementById('totalLosses').textContent = gameState.player.losses;
+            
+            const totalGames = gameState.player.wins + gameState.player.losses;
+            const winRate = totalGames > 0 ? Math.round((gameState.player.wins / totalGames) * 100) : 0;
+            document.getElementById('winRate').textContent = winRate + '%';
+            document.getElementById('totalEarnings').textContent = gameState.player.earnings;
+        }
+
+        // Matching
+        function findMatch() {
+            if (gameState.player.balance < 1) {
+                alert('Insufficient balance! You need at least 1 coin to play.');
+                return;
+            }
+            
+            gameState.player.balance -= 1;
+            updateDashboard();
+            showPage('matchingPage');
+            
+            // Simulate matching delay
+            setTimeout(() => {
+                startGame();
+            }, 2000);
+        }
+
+        function forfeit() {
+            if (confirm('Are you sure you want to forfeit? You will lose this match.')) {
+                endGame(false);
+            }
+        }
+
+        // Game Functions
+        function startGame() {
+            gameState.inGame = true;
+            gameState.player.health = 100;
+            gameState.opponent.health = 100;
+            gameState.roundNumber = 1;
+            gameState.turnCount = 0;
+            gameState.doubleDamageActive = false;
+            gameState.skipNextTurn = false;
+            
+            // Coin flip for first turn
+            gameState.isPlayerTurn = Math.random() < 0.5;
+            
+            startNewRound();
+            showPage('gamePage');
+            updateGameUI();
+        }
+
+        function startNewRound() {
+            // Generate random bullets (2-5 live, 2-5 blank)
+            const liveCount = Math.floor(Math.random() * 4) + 2; // 2-5
+            const blankCount = Math.floor(Math.random() * 4) + 2; // 2-5
+            
+            gameState.bullets = [];
+            for (let i = 0; i < liveCount; i++) gameState.bullets.push('live');
+            for (let i = 0; i < blankCount; i++) gameState.bullets.push('blank');
+            
+            // Shuffle bullets
+            for (let i = gameState.bullets.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameState.bullets[i], gameState.bullets[j]] = [gameState.bullets[j], gameState.bullets[i]];
+            }
+            
+            // Cap at 5 bullets
+            if (gameState.bullets.length > 5) {
+                gameState.bullets = gameState.bullets.slice(0, 5);
+            }
+            
+            gameState.currentBulletIndex = 0;
+            gameState.turnCount = 0;
+            
+            // Assign random powers
+            assignRandomPowers();
+            updateGameUI();
+        }
+
+        function assignRandomPowers() {
+            // Shuffle powers and assign 3 to each player
+            const shuffled = [...powersList].sort(() => Math.random() - 0.5);
+            gameState.player.powers = shuffled.slice(0, 3).map(p => ({...p, used: false}));
+            gameState.opponent.powers = shuffled.slice(3, 6).map(p => ({...p, used: false}));
+        }
+
+        function updateGameUI() {
+            // Update health bars
+            updateHealthBar('player', gameState.player.health);
+            updateHealthBar('opponent', gameState.opponent.health);
+            
+            // Update turn indicator
+            document.getElementById('turnIndicator').textContent = 
+                gameState.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
+            
+            // Update bullets display
+            const bulletsDiv = document.getElementById('bulletsDisplay');
+            bulletsDiv.innerHTML = '';
+            for (let i = gameState.currentBulletIndex; i < gameState.bullets.length; i++) {
+                const bullet = document.createElement('div');
+                bullet.className = 'bullet';
+                bulletsDiv.appendChild(bullet);
+            }
+            
+            // Update powers
+            updatePowerButtons('playerPowers', gameState.player.powers, true);
+            updatePowerButtons('opponentPowers', gameState.opponent.powers, false);
+        }
+
+        function updateHealthBar(player, health) {
+            const healthBar = document.getElementById(player + 'Health');
+            healthBar.style.width = health + '%';
+            healthBar.textContent = health + ' HP';
+        }
+
+        function updatePowerButtons(containerId, powers, clickable) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            powers.forEach(power => {
+                const btn = document.createElement('button');
+                btn.className = 'power-btn';
+                btn.disabled = power.used || !clickable;
+                btn.innerHTML = `<span class="power-name">${power.name}</span><span class="power-desc">${power.desc}</span>`;
+                
+                if (clickable && !power.used) {
+                    btn.onclick = () => usePower(power.id);
+                }
+                
+                container.appendChild(btn);
+            });
+        }
+
+        function shootGun() {
+            if (!gameState.isPlayerTurn) return;
+            playTriggerClick();
+        }
+
+        function shootOpponent() {
+            if (!gameState.isPlayerTurn || gameState.currentBulletIndex >= gameState.bullets.length) return;
+            
+            playTriggerClick();
+            setTimeout(() => {
+                const bullet = gameState.bullets[gameState.currentBulletIndex];
+                gameState.currentBulletIndex++;
+                gameState.turnCount++;
+                
+                if (bullet === 'live') {
+                    playGunshot();
+                    const damage = gameState.doubleDamageActive ? 40 : 20;
+                    gameState.opponent.health = Math.max(0, gameState.opponent.health - damage);
+                    
+                    document.getElementById('opponentHealth').parentElement.classList.add('shake');
+                    setTimeout(() => {
+                        document.getElementById('opponentHealth').parentElement.classList.remove('shake');
+                    }, 500);
+                    
+                    alert(`💥 Live bullet! Dealt ${damage} damage to opponent!`);
+                } else {
+                    alert('💨 Blank bullet! No damage.');
+                }
+                
+                gameState.doubleDamageActive = false;
+                checkGameEnd();
+                
+                if (gameState.inGame) {
+                    checkRoundEnd();
+                    gameState.isPlayerTurn = false;
+                    updateGameUI();
+                    setTimeout(opponentTurn, 1500);
+                }
+            }, 300);
+        }
+
+        function shootSelf() {
+            if (!gameState.isPlayerTurn || gameState.currentBulletIndex >= gameState.bullets.length) return;
+            
+            playTriggerClick();
+            setTimeout(() => {
+                const bullet = gameState.bullets[gameState.currentBulletIndex];
+                gameState.currentBulletIndex++;
+                gameState.turnCount++;
+                
+                if (bullet === 'live') {
+                    playGunshot();
+                    const damage = gameState.doubleDamageActive ? 40 : 20;
+                    gameState.player.health = Math.max(0, gameState.player.health - damage);
+                    
+                    document.getElementById('playerHealth').parentElement.classList.add('shake');
+                    setTimeout(() => {
+                        document.getElementById('playerHealth').parentElement.classList.remove('shake');
+                    }, 500);
+                    
+                    alert(`💥 Live bullet! You took ${damage} damage!`);
+                    gameState.doubleDamageActive = false;
+                    checkGameEnd();
+                    
+                    if (gameState.inGame) {
+                        checkRoundEnd();
+                        gameState.isPlayerTurn = false;
+                        updateGameUI();
+                        setTimeout(opponentTurn, 1500);
+                    }
+                } else {
+                    alert('💨 Blank bullet! You dodged and get another turn!');
+                    gameState.doubleDamageActive = false;
+                    checkRoundEnd();
+                    updateGameUI();
+                }
+            }, 300);
+        }
+
+        function opponentTurn() {
+            if (!gameState.inGame || gameState.currentBulletIndex >= gameState.bullets.length) return;
+            
+            // Check if opponent should skip turn
+            if (gameState.skipNextTurn) {
+                alert('🚫 Opponent\'s turn skipped!');
+                gameState.skipNextTurn = false;
+                gameState.isPlayerTurn = true;
+                updateGameUI();
+                return;
+            }
+            
+            // AI logic - use power or shoot
+            const shouldUsePower = Math.random() < 0.3;
+            if (shouldUsePower) {
+                const availablePowers = gameState.opponent.powers.filter(p => !p.used);
+                if (availablePowers.length > 0) {
+                    const power = availablePowers[Math.floor(Math.random() * availablePowers.length)];
+                    useOpponentPower(power.id);
+                    setTimeout(opponentTurn, 1000);
+                    return;
+                }
+            }
+            
+            // Shoot
+            playTriggerClick();
+            setTimeout(() => {
+                const bullet = gameState.bullets[gameState.currentBulletIndex];
+                gameState.currentBulletIndex++;
+                gameState.turnCount++;
+                
+                const shootSelf = Math.random() < 0.3; // 30% chance to risk shooting self
+                
+                if (shootSelf) {
+                    if (bullet === 'live') {
+                        playGunshot();
+                        const damage = 20;
+                        gameState.opponent.health = Math.max(0, gameState.opponent.health - damage);
+                        alert('🤖 Opponent shot themselves! Live bullet - took damage!');
+                        checkGameEnd();
+                    } else {
+                        alert('🤖 Opponent shot themselves! Blank bullet - they get another turn!');
+                        checkRoundEnd();
+                        if (gameState.inGame) {
+                            setTimeout(opponentTurn, 1500);
+                            return;
+                        }
+                    }
+                } else {
+                    if (bullet === 'live') {
+                        playGunshot();
+                        const damage = 20;
+                        gameState.player.health = Math.max(0, gameState.player.health - damage);
+                        
+                        document.getElementById('playerHealth').parentElement.classList.add('shake');
+                        setTimeout(() => {
+                            document.getElementById('playerHealth').parentElement.classList.remove('shake');
+                        }, 500);
+                        
+                        alert('🤖 Opponent shot you! Live bullet - you took damage!');
+                        checkGameEnd();
+                    } else {
+                        alert('🤖 Opponent shot you! Blank bullet - no damage.');
+                    }
+                }
+                
+                if (gameState.inGame) {
+                    checkRoundEnd();
+                    gameState.isPlayerTurn = true;
+                    updateGameUI();
+                }
+            }, 300);
+        }
+
+        function usePower(powerId) {
+            const power = gameState.player.powers.find(p => p.id === powerId);
+            if (!power || power.used) return;
+            
+            power.used = true;
+            
+            switch(powerId) {
+                case 'skip':
+                    gameState.skipNextTurn = true;
+                    alert('🚫 Skip Turn activated! Opponent will miss their next turn.');
+                    break;
+                case 'xray':
+                    const current = gameState.bullets[gameState.currentBulletIndex];
+                    alert(`👁️ X-Ray: Current bullet is ${current === 'live' ? '💥 LIVE' : '💨 BLANK'}!`);
+                    break;
+                case 'double':
+                    gameState.doubleDamageActive = true;
+                    alert('💥 Double Damage activated! Your next shot deals 40 damage!');
+                    break;
+                case 'heal':
+                    gameState.player.health = Math.min(100, gameState.player.health + 25);
+                    alert('💚 Healed 25 HP!');
+                    break;
+                case 'swap':
+                    if (gameState.currentBulletIndex < gameState.bullets.length - 1) {
+                        [gameState.bullets[gameState.currentBulletIndex], gameState.bullets[gameState.currentBulletIndex + 1]] = 
+                        [gameState.bullets[gameState.currentBulletIndex + 1], gameState.bullets[gameState.currentBulletIndex]];
+                        alert('🔄 Swapped current bullet with next bullet!');
+                    }
+                    break;
+                case 'future':
+                    const next3 = gameState.bullets.slice(gameState.currentBulletIndex, gameState.currentBulletIndex + 3)
+                        .map(b => b === 'live' ? '💥' : '💨').join(' ');
+                    alert(`🔮 Future Sight: Next bullets are ${next3}`);
+                    break;
+            }
+            
+            updateGameUI();
+        }
+
+        function useOpponentPower(powerId) {
+            const power = gameState.opponent.powers.find(p => p.id === powerId);
+            if (!power || power.used) return;
+            
+            power.used = true;
+            
+            switch(powerId) {
+                case 'heal':
+                    gameState.opponent.health = Math.min(100, gameState.opponent.health + 25);
+                    alert('🤖 Opponent used Heal!');
+                    break;
+                case 'double':
+                    alert('🤖 Opponent activated Double Damage!');
+                    break;
+                default:
+                    alert(`🤖 Opponent used ${power.name}!`);
+            }
+            
+            updateGameUI();
+        }
+
+        function checkRoundEnd() {
+            // New round if all bullets used OR 5 turns passed
+            if (gameState.currentBulletIndex >= gameState.bullets.length || gameState.turnCount >= 5) {
+                if (gameState.player.health > 0 && gameState.opponent.health > 0) {
+                    gameState.roundNumber++;
+                    alert(`🔄 Round ${gameState.roundNumber} starts! New bullets loaded and powers refreshed!`);
+                    startNewRound();
+                }
+            }
+        }
+
+        function checkGameEnd() {
+            if (gameState.player.health <= 0) {
+                endGame(false);
+            } else if (gameState.opponent.health <= 0) {
+                endGame(true);
+            }
+        }
+
+        function endGame(playerWon) {
+            gameState.inGame = false;
+            
+            if (playerWon) {
+                gameState.player.wins++;
+                gameState.player.balance += 1.8;
+                gameState.player.earnings += 0.8;
+                alert('🎉 You Won! +1.8 coins');
+            } else {
+                gameState.player.losses++;
+                alert('💀 You Lost! Better luck next time.');
+            }
+            
+            updateDashboard();
+            showPage('dashboardPage');
+        }
+
+        // Wallet Functions
+        function processDeposit() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            const txHash = document.getElementById('depositTxHash').value;
+            
+            if (!amount || amount < 1) {
+                alert('Minimum deposit is 1 USDT');
+                return;
+            }
+            
+            if (!txHash) {
+                alert('Please provide transaction hash');
+                return;
+            }
+            
+            // Simulate deposit
+            const coins = amount * 10;
+            gameState.player.balance += coins;
+            updateDashboard();
+            
+            alert(`✅ Deposit successful! Added ${coins} coins to your balance.`);
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositTxHash').value = '';
+            showPage('dashboardPage');
+        }
+
+        function processWithdraw() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const address = document.getElementById('withdrawAddress').value;
+            
+            if (!amount || amount < 10) {
+                alert('Minimum withdrawal is 10 coins');
+                return;
+            }
+            
+            if (amount > gameState.player.balance) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            const usdt = amount / 10;
+            if (usdt > 10) {
+                alert('Maximum withdrawal is 10 USDT (100 coins)');
+                return;
+            }
+            
+            if (!address || !address.startsWith('0x')) {
+                alert('Please provide a valid BSC wallet address');
+                return;
+            }
+            
+            // Simulate withdrawal
+            gameState.player.balance -= amount;
+            updateDashboard();
+            
+            alert(`✅ Withdrawal request submitted! ${usdt} USDT will be sent to ${address.substring(0, 10)}... within 24 hours.`);
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAddress').value = '';
+            document.getElementById('withdrawBalance').textContent = gameState.player.balance;
+            showPage('dashboardPage');
+        }
+
+        // Update withdraw balance when page opens
+        window.addEventListener('load', () => {
+            const observer = new MutationObserver(() => {
+                if (document.getElementById('withdrawPage').classList.contains('active')) {
+                    document.getElementById('withdrawBalance').textContent = gameState.player.balance;
+                }
+            });
+            
+            observer.observe(document.getElementById('withdrawPage'), {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    </script>
+</body>
+</html>
