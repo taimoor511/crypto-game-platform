@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buckshot Roulette - Crypto Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 50px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 3px solid rgba(102, 126, 234, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+    
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+    
+    .balance-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 14px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1.3rem;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      animation: balancePulse 2s ease-in-out infinite;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    @keyframes balancePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+      50% { transform: scale(1.05); box-shadow: 0 8px 30px rgba(102, 126, 234, 0.9); }
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 50px 30px;
+    }
+    
+    .hero {
+      text-align: center;
+      margin-bottom: 70px;
+      animation: fadeInUp 1s ease;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .hero h1 {
+      font-size: 4rem;
+      margin-bottom: 25px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+    }
+    
+    .hero p {
+      font-size: 1.4rem;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      font-weight: 500;
+    }
+    
+    .btn {
+      padding: 22px 55px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin: 12px;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      transform: translate(-50%, -50%);
+      transition: width 0.8s, height 0.8s;
+    }
+    
+    .btn:hover::before {
+      width: 500px;
+      height: 500px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-6px) scale(1.08);
+      box-shadow: 0 18px 50px rgba(102, 126, 234, 0.8);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(-2px) scale(1.05);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.96);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(15px);
+    }
+    
+    .modal.active {
+      display: flex;
+      animation: modalFade 0.4s ease;
+    }
+    
+    @keyframes modalFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 30px;
+      padding: 55px;
+      max-width: 1000px;
+      width: 95%;
+      max-height: 92vh;
+      overflow-y: auto;
+      border: 4px solid rgba(102, 126, 234, 0.5);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+      animation: modalSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(60px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    .close-btn {
+      float: right;
+      font-size: 3rem;
+      cursor: pointer;
+      color: #667eea;
+      transition: all 0.3s ease;
+      line-height: 1;
+      font-weight: bold;
+    }
+    
+    .close-btn:hover {
+      color: #ff4757;
+      transform: rotate(90deg) scale(1.3);
+    }
+    
+    .coin-flip {
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .coin {
+      font-size: 12rem;
+      display: inline-block;
+      filter: drop-shadow(0 15px 40px rgba(255, 215, 0, 0.7));
+    }
+    
+    .coin.flipping {
+      animation: coinFlip 1s ease;
+    }
+    
+    @keyframes coinFlip {
+      0% { transform: rotateY(0deg) scale(1); }
+      50% { transform: rotateY(900deg) scale(1.2); }
+      100% { transform: rotateY(1800deg) scale(1); }
+    }
+    
+    .timer-container {
+      margin: 20px 0;
+    }
+    
+    .timer-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .timer-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71 0%, #f39c12 50%, #e74c3c 100%);
+      transition: width 0.1s linear;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(46, 204, 113, 0.7);
+    }
+    
+    .timer-text {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #2ecc71;
+      margin: 15px 0;
+      text-shadow: 0 2px 10px rgba(46, 204, 113, 0.6);
+    }
+    
+    .timer-text.warning {
+      color: #f39c12;
+      animation: timerPulse 0.5s infinite;
+    }
+    
+    .timer-text.danger {
+      color: #e74c3c;
+      animation: timerPulse 0.3s infinite;
+    }
+    
+    @keyframes timerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    
+    .game-arena {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 25px;
+      padding: 40px;
+      margin: 30px 0;
+      border: 4px solid #667eea;
+      box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4), inset 0 0 30px rgba(102, 126, 234, 0.15);
+    }
+    
+    .round-info {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.35) 0%, rgba(118, 75, 162, 0.35) 100%);
+      border-radius: 18px;
+      border: 3px solid rgba(102, 126, 234, 0.7);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+    
+    .round-info h3 {
+      font-size: 2.2rem;
+      color: #667eea;
+      font-weight: 900;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(102, 126, 234, 0.6);
+    }
+    
+    .shots-counter {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 18px 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+    
+    .shots-item {
+      padding: 12px 25px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .bullets-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      margin: 30px auto;
+      max-width: 750px;
+    }
+    
+    .bullet-stat {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+      border-radius: 20px;
+      padding: 35px 25px;
+      text-align: center;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .bullet-stat:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    }
+    
+    .bullet-stat-icon {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+    }
+    
+    .bullet-stat-value {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    .bullet-stat-label {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.75);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    
+    .bullet-stat.total {
+      border-color: #667eea;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .bullet-stat.total .bullet-stat-value {
+      color: #667eea;
+    }
+    
+    .bullet-stat.live {
+      border-color: #ff4757;
+      box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+    }
+    
+    .bullet-stat.live .bullet-stat-value {
+      color: #ff4757;
+    }
+    
+    .bullet-stat.blank {
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+    }
+    
+    .bullet-stat.blank .bullet-stat-value {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .character-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+      border-radius: 25px;
+      padding: 35px;
+      margin: 25px 0;
+      border: 4px solid transparent;
+      transition: all 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .character-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.15), transparent);
+      animation: cardShine 4s infinite;
+    }
+    
+    @keyframes cardShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    .character-card.active {
+      border-color: #2ecc71;
+      box-shadow: 0 0 50px rgba(46, 204, 113, 0.8);
+      transform: scale(1.04);
+    }
+    
+    .character-avatar {
+      font-size: 6rem;
+      margin-bottom: 22px;
+      filter: drop-shadow(0 0 20px rgba(102, 126, 234, 1));
+      animation: avatarFloat 3.5s ease-in-out infinite;
+    }
+    
+    @keyframes avatarFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
+    }
+    
+    .health-bar {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 22px 0;
+      font-size: 3rem;
+    }
+    
+    .heart {
+      animation: heartbeat 1.8s infinite;
+      filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.7));
+    }
+    
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    .power-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 18px;
+      margin: 30px 0;
+    }
+    
+    .power-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border-radius: 18px;
+      padding: 22px;
+      text-align: center;
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    
+    .power-card:hover:not(.used) {
+      border-color: #ffa502;
+      transform: translateY(-10px) scale(1.08);
+      box-shadow: 0 18px 40px rgba(255, 165, 2, 0.6);
+    }
+    
+    .power-card.used {
+      opacity: 0.2;
+      cursor: not-allowed;
+      filter: grayscale(100%);
+    }
+    
+    .power-card.active {
+      border-color: #2ecc71;
+      box-shadow: 0 0 35px rgba(46, 204, 113, 0.8);
+      background: linear-gradient(135deg, rgba(46, 204, 113, 0.25) 0%, rgba(39, 174, 96, 0.25) 100%);
+      transform: scale(1.05);
+    }
+    
+    .power-icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+    }
+    
+    .power-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.95);
+      letter-spacing: 1px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+    
+    .btn-shoot {
+      background: linear-gradient(135deg, #ff4757 0%, #c23616 100%);
+      color: white;
+      box-shadow: 0 12px 35px rgba(255, 71, 87, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-shoot:hover {
+      box-shadow: 0 18px 50px rgba(255, 71, 87, 0.8);
+    }
+    
+    .notification {
+      position: fixed;
+      top: 130px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 28px 55px;
+      border-radius: 18px;
+      font-size: 1.8rem;
+      font-weight: 900;
+      box-shadow: 0 18px 50px rgba(102, 126, 234, 0.8);
+      z-index: 2000;
+      display: none;
+      max-width: 90%;
+      text-align: center;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+    
+    .notification.show {
+      display: block;
+      animation: notifBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes notifBounce {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.8); }
+      60% { opacity: 1; transform: translateX(-50%) translateY(10px) scale(1.05); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    
+    .character-select {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 30px;
+      margin: 40px 0;
+    }
+    
+    .character-option {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+      border-radius: 25px;
+      padding: 35px;
+      text-align: center;
+      border: 4px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .character-option:hover {
+      border-color: #667eea;
+      transform: scale(1.1);
+      box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+    }
+    
+    .character-option h3 {
+      font-size: 1.8rem;
+      margin-top: 15px;
+      font-weight: 800;
+    }
+    
+    .powers-label {
+      background: rgba(0,0,0,0.5);
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .bullets-info { grid-template-columns: 1fr; }
+      .action-buttons { flex-direction: column; width: 100%; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div id="notification" class="notification"></div>
+
+    <div class="navbar">
+      <div class="logo">🎮 BUCKSHOT ROULETTE</div>
+      <div class="balance-badge">🪙 <span id="balance">10.00</span></div>
+    </div>
+
+    <div class="container">
+      <div class="hero">
+        <h1>💥 BUCKSHOT ROULETTE 💥</h1>
+        <p>Strategic Powers • Timed Turns • Earn Crypto</p>
+      </div>
+
+      <div style="text-align: center; margin: 60px 0;">
+        <button class="btn btn-primary" onclick="showCharacterSelect()">🎯 START GAME</button>
+      </div>
+    </div>
+
+    <div id="coinFlipModal" class="modal">
+      <div class="modal-content">
+        <h2 style="text-align: center; margin-bottom: 50px; font-size: 3rem; font-weight: 900;">🪙 COIN FLIP!</h2>
+        <div class="coin-flip">
+          <div class="coin" id="coin">🪙</div>
+        </div>
+        <h3 style="text-align: center; margin-top: 50px; font-size: 2.5rem; font-weight: 800;" id="coinResult"></h3>
+      </div>
+    </div>
+
+    <div id="characterModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('characterModal')">&times;</span>
+        <h2 style="text-align: center; margin-bottom: 50px; font-size: 3rem; font-weight: 900;">CHOOSE YOUR FIGHTER</h2>
+        
+        <div class="character-select">
+          <div class="character-option" onclick="selectCharacter('🥷', 'Shadow')">
+            <div class="character-avatar">🥷</div>
+            <h3>SHADOW</h3>
+          </div>
+          <div class="character-option" onclick="selectCharacter('🤠', 'Gunslinger')">
+            <div class="character-avatar">🤠</div>
+            <h3>GUNSLINGER</h3>
+          </div>
+          <div class="character-option" onclick="selectCharacter('⚔️', 'Knight')">
+            <div class="character-avatar">⚔️</div>
+            <h3>KNIGHT</h3>
+          </div>
+          <div class="character-option" onclick="selectCharacter('🧙', 'Wizard')">
+            <div class="character-avatar">🧙</div>
+            <h3>WIZARD</h3>
+          </div>
+        </div>
+        <p style="text-align: center; color: rgba(255,255,255,0.8); margin-top: 30px; font-size: 1.2rem; font-weight: 600;">
+          💡 5 bullets per round • Powers reset • 20s turns!
+        </p>
+      </div>
+    </div>
+
+    <div id="gameModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="endGame()">&times;</span>
+        <h2 style="text-align: center; margin-bottom: 30px; font-size: 3rem; font-weight: 900;">⚔️ BATTLE ARENA ⚔️</h2>
+        
+        <div class="timer-container">
+          <div class="timer-bar">
+            <div class="timer-fill" id="timerFill"></div>
+          </div>
+          <div class="timer-text" id="timerText">⏱️ 20s</div>
+        </div>
+        
+        <div class="round-info">
+          <h3>ROUND <span id="round">1</span></h3>
+          <div class="shots-counter">
+            <div class="shots-item">🎯 SHOT <span id="shotNumber">1</span>/5</div>
+          </div>
+        </div>
+        
+        <div class="game-arena">
+          <div class="bullets-info">
+            <div class="bullet-stat total">
+              <div class="bullet-stat-icon">🔫</div>
+              <div class="bullet-stat-value" id="totalCount">5</div>
+              <div class="bullet-stat-label">Total Left</div>
+            </div>
+            <div class="bullet-stat live">
+              <div class="bullet-stat-icon">💥</div>
+              <div class="bullet-stat-value" id="liveCount">0</div>
+              <div class="bullet-stat-label">Live</div>
+            </div>
+            <div class="bullet-stat blank">
+              <div class="bullet-stat-icon">⚪</div>
+              <div class="bullet-stat-value" id="blankCount">0</div>
+              <div class="bullet-stat-label">Blank</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="character-card" id="opponentCard">
+          <div style="text-align: center;">
+            <div class="character-avatar" id="opponentAvatar"></div>
+            <h3 id="opponentName" style="font-size: 2.2rem; font-weight: 900;"></h3>
+            <div class="health-bar" id="opponentHealth"></div>
+            <div class="powers-label">
+              <strong>POWERS:</strong> <span id="opponentPowers"></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+          <h2 id="turnText" style="font-size: 2.5rem; font-weight: 900;"></h2>
+        </div>
+
+        <div class="character-card active" id="playerCard">
+          <div style="text-align: center;">
+            <div class="character-avatar" id="playerAvatar"></div>
+            <h3 id="playerName" style="font-size: 2.2rem; font-weight: 900;"></h3>
+            <div class="health-bar" id="playerHealth"></div>
+          </div>
+        </div>
+
+        <div id="powersSection">
+          <h4 style="text-align: center; margin-bottom: 25px; font-size: 1.8rem; font-weight: 900;">⚡ YOUR POWERS ⚡</h4>
+          <div class="power-cards" id="playerPowers"></div>
+        </div>
+
+        <div class="action-buttons" id="actions">
+          <button class="btn btn-shoot" onclick="shoot('opponent')">🔫 SHOOT OPPONENT</button>
+          <button class="btn btn-primary" onclick="shoot('self')">🎲 SHOOT SELF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(freq, duration) {
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.frequency.value = freq;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + duration);
+    }
+    
+    function soundClick() { playSound(400, 0.05); }
+    function soundBang() {
+      playSound(80, 0.15);
+      setTimeout(() => playSound(150, 0.1), 50);
+    }
+    function soundBlank() { playSound(300, 0.1); }
+    function soundWin() { 
+      playSound(600, 0.5);
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+    function soundLose() { playSound(150, 0.8); }
+    function soundHeal() { playSound(500, 0.4); }
+    function soundPower() { playSound(800, 0.3); }
+
+    const ALL_POWERS = [
+      { id: 'skip', icon: '⏭️', name: 'Skip Turn' },
+      { id: 'xray', icon: '👁️', name: 'X-Ray' },
+      { id: 'double', icon: '⚡', name: 'Double DMG' },
+      { id: 'heal', icon: '💊', name: 'Heal' },
+      { id: 'swap', icon: '🔄', name: 'Swap' },
+      { id: 'future', icon: '🔮', name: 'Future' }
+    ];
+
+    let game = {
+      chamber: [],
+      playerHP: 3,
+      opponentHP: 3,
+      playerAvatar: '',
+      playerName: '',
+      opponentAvatar: '',
+      opponentName: '',
+      currentTurn: 'player',
+      opponentSkipNext: false,
+      playerSkipNext: false,
+      round: 1,
+      shotNumber: 1,
+      playerPowers: [],
+      opponentPowers: [],
+      usedPowers: new Set(),
+      activePower: null,
+      balance: 10,
+      turnTimer: null,
+      timeLeft: 20
+    };
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function getRandomPowers(count) {
+      const shuffled = [...ALL_POWERS];
+      shuffle(shuffled);
+      return shuffled.slice(0, count);
+    }
+
+    function showNotif(msg) {
+      const n = document.getElementById('notification');
+      n.textContent = msg;
+      n.classList.add('show');
+      setTimeout(() => n.classList.remove('show'), 3000);
+    }
+
+    function showCharacterSelect() {
+      document.getElementById('characterModal').classList.add('active');
+    }
+
+    function selectCharacter(avatar, name) {
+      game.playerAvatar = avatar;
+      game.playerName = name;
+      
+      const chars = [['🥷', 'Shadow'], ['🤠', 'Gunslinger'], ['⚔️', 'Knight'], ['🧙', 'Wizard']];
+      const opp = chars[Math.floor(Math.random() * chars.length)];
+      game.opponentAvatar = opp[0];
+      game.opponentName = opp[1];
+      
+      closeModal('characterModal');
+      coinFlip();
+    }
+
+    function coinFlip() {
+      document.getElementById('coinFlipModal').classList.add('active');
+      const coin = document.getElementById('coin');
+      coin.classList.remove('flipping');
+      setTimeout(() => {
+        coin.classList.add('flipping');
+      }, 10);
+      
+      // TRUE RANDOM coin flip
+      const isHeads = Math.random() >= 0.5;
+      
+      setTimeout(() => {
+        coin.textContent = isHeads ? '😊' : '💀';
+        game.currentTurn = isHeads ? 'player' : 'opponent';
+        document.getElementById('coinResult').textContent = 
+          isHeads ? '🎉 HEADS! You go first!' : '💀 TAILS! Opponent goes first!';
+        
+        setTimeout(() => {
+          closeModal('coinFlipModal');
+          startGame();
+        }, 2000);
+      }, 1000);
+    }
+
+    function startTurnTimer() {
+      stopTurnTimer();
+      game.timeLeft = 20;
+      updateTimer();
+      
+      game.turnTimer = setInterval(() => {
+        game.timeLeft--;
+        updateTimer();
+        
+        if (game.timeLeft <= 0) {
+          stopTurnTimer();
+          showNotif('⏰ TIME\'S UP! Turn skipped');
+          
+          if (game.currentTurn === 'player') {
+            game.currentTurn = 'opponent';
+            updateUI();
+            setTimeout(opponentTurn, 1000);
+          } else {
+            game.currentTurn = 'player';
+            updateUI();
+            startTurnTimer();
+          }
+        }
+      }, 1000);
+    }
+
+    function stopTurnTimer() {
+      if (game.turnTimer) {
+        clearInterval(game.turnTimer);
+        game.turnTimer = null;
+      }
+    }
+
+    function updateTimer() {
+      const fill = document.getElementById('timerFill');
+      const text = document.getElementById('timerText');
+      const percent = (game.timeLeft / 20) * 100;
+      
+      fill.style.width = percent + '%';
+      text.textContent = `⏱️ ${game.timeLeft}s`;
+      
+      text.classList.remove('warning', 'danger');
+      if (game.timeLeft <= 5) {
+        text.classList.add('danger');
+      } else if (game.timeLeft <= 10) {
+        text.classList.add('warning');
+      }
+    }
+
+    function startGame() {
+      game.playerHP = 3;
+      game.opponentHP = 3;
+      game.round = 1;
+      game.shotNumber = 1;
+      game.opponentSkipNext = false;
+      game.playerSkipNext = false;
+      
+      newRound();
+      updateUI();
+      document.getElementById('gameModal').classList.add('active');
+      
+      if (game.currentTurn === 'player') {
+        startTurnTimer();
+      } else {
+        setTimeout(opponentTurn, 1500);
+      }
+    }
+
+    function newRound() {
+      // Always 5 bullets, random live/blank
+      game.chamber = [];
+      const liveCount = Math.floor(Math.random() * 4) + 1; // 1-4 live
+      const blankCount = 5 - liveCount;
+      
+      for (let i = 0; i < liveCount; i++) game.chamber.push(true);
+      for (let i = 0; i < blankCount; i++) game.chamber.push(false);
+      shuffle(game.chamber);
+      
+      game.shotNumber = 1;
+      game.playerPowers = getRandomPowers(3);
+      game.opponentPowers = getRandomPowers(3);
+      game.usedPowers = new Set();
+      game.activePower = null;
+      
+      updateBullets();
+      updateShotCounter();
+      showNotif(`🔄 ROUND ${game.round} - NEW BULLETS!`);
+    }
+
+    function updateShotCounter() {
+      document.getElementById('shotNumber').textContent = game.shotNumber;
+    }
+
+    function updateUI() {
+      document.getElementById('playerAvatar').textContent = game.playerAvatar;
+      document.getElementById('playerName').textContent = game.playerName;
+      document.getElementById('opponentAvatar').textContent = game.opponentAvatar;
+      document.getElementById('opponentName').textContent = game.opponentName;
+      document.getElementById('round').textContent = game.round;
+      
+      const oppPowerNames = game.opponentPowers.map(p => p.icon).join(' ');
+      document.getElementById('opponentPowers').textContent = oppPowerNames;
+      
+      updateHealth();
+      updateTurn();
+      updatePowers();
+      updateBullets();
+      updateShotCounter();
+    }
+
+    function updateHealth() {
+      document.getElementById('playerHealth').innerHTML = '❤️'.repeat(Math.max(0, game.playerHP));
+      document.getElementById('opponentHealth').innerHTML = '❤️'.repeat(Math.max(0, game.opponentHP));
+    }
+
+    function updateTurn() {
+      const isPlayer = game.currentTurn === 'player';
+      let turnMsg = isPlayer ? '🎯 YOUR TURN!' : '⏳ OPPONENT\'S TURN...';
+      
+      if (game.playerSkipNext && isPlayer) {
+        turnMsg = '⏭️ SKIPPED!';
+      } else if (game.opponentSkipNext && !isPlayer) {
+        turnMsg = '⏭️ OPPONENT SKIPPED!';
+      }
+      
+      document.getElementById('turnText').textContent = turnMsg;
+      document.getElementById('turnText').style.color = isPlayer ? '#2ecc71' : '#ffa502';
+      document.getElementById('playerCard').classList.toggle('active', isPlayer);
+      document.getElementById('opponentCard').classList.toggle('active', !isPlayer);
+      
+      document.getElementById('actions').style.display = isPlayer ? 'flex' : 'none';
+      document.getElementById('powersSection').style.display = isPlayer ? 'block' : 'none';
+    }
+
+    function updateBullets() {
+      const live = game.chamber.filter(b => b).length;
+      const blank = game.chamber.length - live;
+      const total = game.chamber.length;
+      
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('liveCount').textContent = live;
+      document.getElementById('blankCount').textContent = blank;
+    }
+
+    function updatePowers() {
+      const html = game.playerPowers.map(p => {
+        const used = game.usedPowers.has(p.id);
+        const active = game.activePower === p.id;
+        return `
+          <div class="power-card ${used ? 'used' : ''} ${active ? 'active' : ''}" onclick="usePower('${p.id}')">
+            <div class="power-icon">${p.icon}</div>
+            <div class="power-name">${p.name}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('playerPowers').innerHTML = html;
+    }
+
+    function usePower(powerId) {
+      if (game.currentTurn !== 'player') return;
+      if (game.usedPowers.has(powerId)) {
+        showNotif('⚠️ POWER ALREADY USED!');
+        return;
+      }
+      
+      const power = game.playerPowers.find(p => p.id === powerId);
+      if (!power) return;
+      
+      soundPower();
+      
+      if (powerId === 'xray') {
+        const next = game.chamber[0];
+        showNotif(`👁️ X-RAY: Next is ${next ? '💥 LIVE!' : '⚪ BLANK!'}`);
+        game.usedPowers.add(powerId);
+      } else if (powerId === 'heal') {
+        if (game.playerHP >= 3) {
+          showNotif('⚠️ ALREADY AT MAX HP!');
+          return;
+        }
+        soundHeal();
+        game.playerHP++;
+        showNotif('💊 HEALED! +1 HP');
+        game.usedPowers.add(powerId);
+        updateHealth();
+      } else if (powerId === 'swap') {
+        if (game.chamber.length === 0) {
+          showNotif('⚠️ NO BULLETS LEFT!');
+          return;
+        }
+        game.chamber[0] = !game.chamber[0];
+        showNotif(`🔄 SWAPPED! Next is ${game.chamber[0] ? '💥 LIVE' : '⚪ BLANK'}`);
+        game.usedPowers.add(powerId);
+        updateBullets();
+      } else if (powerId === 'future') {
+        const n = Math.floor(Math.random() * 3) + 2;
+        const future = game.chamber.slice(0, n);
+        const display = future.map(b => b ? '💥' : '⚪').join(' → ');
+        showNotif(`🔮 FUTURE: Next ${n}: ${display}`);
+        game.usedPowers.add(powerId);
+      } else if (powerId === 'skip') {
+        game.opponentSkipNext = true;
+        showNotif('⏭️ SKIP! Opponent skips next turn');
+        game.usedPowers.add(powerId);
+      } else {
+        game.activePower = game.activePower === powerId ? null : powerId;
+        showNotif(game.activePower === powerId ? `⚡ ${power.name} READY!` : 'Power deactivated');
+      }
+      
+      updatePowers();
+    }
+
+    function shoot(target) {
+      if (game.currentTurn !== 'player') return;
+      
+      stopTurnTimer();
+      
+      if (game.playerSkipNext) {
+        game.playerSkipNext = false;
+        game.currentTurn = 'opponent';
+        updateUI();
+        showNotif('⏭️ YOU WERE SKIPPED!');
+        setTimeout(opponentTurn, 1500);
+        return;
+      }
+      
+      if (game.chamber.length === 0 || game.shotNumber > 5) {
+        game.round++;
+        newRound();
+        updateUI();
+        startTurnTimer();
+        return;
+      }
+      
+      soundClick();
+      const isLive = game.chamber.shift();
+      game.shotNumber++;
+      
+      setTimeout(() => {
+        if (isLive) {
+          soundBang();
+          const dmg = game.activePower === 'double' ? 2 : 1;
+          
+          if (target === 'opponent') {
+            game.opponentHP -= dmg;
+            showNotif(`💥 BANG! Opponent -${dmg} HP`);
+            
+            if (game.opponentHP <= 0) {
+              soundWin();
+              game.balance += 1.8;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('🎉 VICTORY! +1.8 coins!');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          } else {
+            game.playerHP -= dmg;
+            showNotif(`💥 BANG! You -${dmg} HP`);
+            
+            if (game.playerHP <= 0) {
+              soundLose();
+              game.balance -= 1;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('💀 DEFEAT! -1 coin');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          }
+          
+          game.currentTurn = 'opponent';
+        } else {
+          soundBlank();
+          showNotif('⚪ CLICK! ' + (target === 'self' ? 'Go again!' : 'Opponent turn'));
+          
+          if (target === 'opponent') {
+            game.currentTurn = 'opponent';
+          }
+        }
+        
+        if (game.activePower === 'double') {
+          game.usedPowers.add('double');
+        }
+        game.activePower = null;
+        
+        updateUI();
+        
+        if (game.shotNumber > 5) {
+          setTimeout(() => {
+            game.round++;
+            newRound();
+            updateUI();
+            if (game.currentTurn === 'opponent') {
+              setTimeout(opponentTurn, 1500);
+            } else {
+              startTurnTimer();
+            }
+          }, 1500);
+        } else if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        } else {
+          startTurnTimer();
+        }
+      }, 500);
+    }
+
+    function opponentTurn() {
+      if (game.currentTurn !== 'opponent') return;
+      
+      stopTurnTimer();
+      
+      if (game.opponentSkipNext) {
+        game.opponentSkipNext = false;
+        game.currentTurn = 'player';
+        updateUI();
+        showNotif('⏭️ OPPONENT SKIPPED!');
+        startTurnTimer();
+        return;
+      }
+      
+      if (game.chamber.length === 0 || game.shotNumber > 5) {
+        game.round++;
+        newRound();
+        updateUI();
+        if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        } else {
+          startTurnTimer();
+        }
+        return;
+      }
+      
+      // AI logic
+      if (Math.random() > 0.6) {
+        const available = game.opponentPowers.filter(p => !game.usedPowers.has('opp_' + p.id));
+        if (available.length > 0) {
+          const power = available[Math.floor(Math.random() * available.length)];
+          
+          if (power.id === 'heal' && game.opponentHP < 3) {
+            soundHeal();
+            game.opponentHP++;
+            showNotif('Opponent used 💊 HEAL!');
+            game.usedPowers.add('opp_heal');
+            updateHealth();
+            setTimeout(opponentTurn, 1000);
+            return;
+          } else if (power.id === 'swap') {
+            game.chamber[0] = !game.chamber[0];
+            showNotif('Opponent used 🔄 SWAP!');
+            game.usedPowers.add('opp_swap');
+            updateBullets();
+          } else if (power.id === 'skip') {
+            game.playerSkipNext = true;
+            showNotif('Opponent used ⏭️ SKIP!');
+            game.usedPowers.add('opp_skip');
+          }
+        }
+      }
+      
+      const target = Math.random() > 0.7 ? 'self' : 'opponent';
+      
+      soundClick();
+      const isLive = game.chamber.shift();
+      game.shotNumber++;
+      
+      setTimeout(() => {
+        if (isLive) {
+          soundBang();
+          
+          if (target === 'opponent') {
+            game.playerHP--;
+            showNotif('💥 BANG! Opponent hits you!');
+            
+            if (game.playerHP <= 0) {
+              soundLose();
+              game.balance -= 1;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('💀 DEFEAT! -1 coin');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          } else {
+            game.opponentHP--;
+            showNotif('💥 BANG! Opponent shoots self!');
+            
+            if (game.opponentHP <= 0) {
+              soundWin();
+              game.balance += 1.8;
+              document.getElementById('balance').textContent = game.balance.toFixed(2);
+              showNotif('🎉 VICTORY! +1.8 coins!');
+              setTimeout(endGame, 2500);
+              return;
+            }
+          }
+          
+          game.currentTurn = 'player';
+        } else {
+          soundBlank();
+          showNotif('⚪ CLICK! ' + (target === 'self' ? 'Opponent goes again' : 'Your turn'));
+          
+          if (target === 'opponent') {
+            game.currentTurn = 'player';
+          }
+        }
+        
+        updateUI();
+        
+        if (game.shotNumber > 5) {
+          setTimeout(() => {
+            game.round++;
+            newRound();
+            updateUI();
+            if (game.currentTurn === 'opponent') {
+              setTimeout(opponentTurn, 1500);
+            } else {
+              startTurnTimer();
+            }
+          }, 1500);
+        } else if (game.currentTurn === 'opponent') {
+          setTimeout(opponentTurn, 1500);
+        } else {
+          startTurnTimer();
+        }
+      }, 500);
+    }
+
+    function endGame() {
+      stopTurnTimer();
+      closeModal('gameModal');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+  </script>
+</body>
+</html>
