@@ -1339,10 +1339,11 @@
                     alert('💚 Healed 25 HP!');
                     break;
                 case 'swap':
-                    if (gameState.currentBulletIndex < gameState.bullets.length - 1) {
-                        [gameState.bullets[gameState.currentBulletIndex], gameState.bullets[gameState.currentBulletIndex + 1]] = 
-                        [gameState.bullets[gameState.currentBulletIndex + 1], gameState.bullets[gameState.currentBulletIndex]];
-                        alert('🔄 Swapped current bullet with next bullet!');
+                    if (gameState.currentBulletIndex < gameState.bullets.length) {
+                        // Flip the polarity of the current bullet (live <-> blank)
+                        gameState.bullets[gameState.currentBulletIndex] = 
+                            gameState.bullets[gameState.currentBulletIndex] === 'live' ? 'blank' : 'live';
+                        alert('🔄 Swapped! Bullet polarity changed (secret)');
                     }
                     break;
                 case 'future':

@@ -185,8 +185,10 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Demo server running on port ${PORT}`);
+const HOST = '0.0.0.0'; // Bind to all interfaces
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Demo server running on ${HOST}:${PORT}`);
   console.log(`🌐 Mode: DEMO (no database)`);
   console.log(`💡 All data is in-memory only`);
+  console.log(`🔗 Access: http://18.119.134.65:${PORT}`);
 });
