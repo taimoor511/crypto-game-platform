@@ -1,0 +1,286 @@
+.game-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.balance-display {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.game-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Idle State */
+.game-idle {
+  text-align: center;
+  max-width: 500px;
+}
+
+.game-idle h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.game-idle p {
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.message {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Searching */
+.game-searching {
+  text-align: center;
+}
+
+.searching-animation {
+  font-size: 4rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.game-searching h2 {
+  margin: 20px 0 30px;
+}
+
+/* Match */
+.game-match {
+  width: 100%;
+  max-width: 800px;
+}
+
+.match-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-state-info {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.bullets-remaining, .round-info {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.players-display {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.player-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-card.current {
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.player-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.player-health {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 2rem;
+}
+
+.action-message {
+  text-align: center;
+  margin: 20px 0;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.message-bubble {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.last-action {
+  font-size: 3rem;
+  animation: actionPop 0.5s ease;
+}
+
+@keyframes actionPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.last-action.live {
+  color: #ff3b30;
+}
+
+.last-action.blank {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Game Controls */
+.game-controls {
+  text-align: center;
+}
+
+.turn-indicator {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 20px;
+}
+
+.waiting-indicator {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 30px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 20px 40px;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  font-weight: bold;
+  min-width: 200px;
+}
+
+.btn-shoot-opponent {
+  background: linear-gradient(135deg, #ff3b30 0%, #c23228 100%);
+  color: white;
+}
+
+.btn-shoot-opponent:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 59, 48, 0.5);
+}
+
+.btn-shoot-self {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-shoot-self:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+}
+
+.hint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Game Over */
+.game-over {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-over-message {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .game-navbar {
+    padding: 10px 15px;
+  }
+
+  .game-title {
+    font-size: 1rem;
+  }
+
+  .player-name {
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-action {
+    width: 100%;
+  }
+}
